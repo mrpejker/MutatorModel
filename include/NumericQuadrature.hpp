@@ -1,26 +1,36 @@
+#ifndef MutatorModel_NumericQuadrature_hpp
+#define MutatorModel_NumericQuadrature_hpp
+
 #include <array>
 
 namespace numerics_internal {
   struct NumericQuadrature_base {
-
   };
 };
 
 
 //! Compute Gauss integral
-template< int Order = 0>
+template< int Order >
 struct NumericQuadrature {
 private:
   //Should never be compiled
   template<class F>
   double operator()(F f, double a, double b) {
-    return (b - a) * f((a + b) / 2);
+    return 0;
+  };
+};
+
+template<>
+struct NumericQuadrature< 0 > {
+private:
+  template<class F>
+  double operator()(F f, double a, double b) {
+    return 0;
   };
 };
 
 template<>
 struct NumericQuadrature< 1 > {
-private:
   template<class F>
   double operator()(F f, double a, double b) {
     return (b - a) * f((a + b) / 2);
@@ -81,3 +91,5 @@ struct NumericQuadrature< 4 > {
     return A * sum;
   };
 };
+
+#endif

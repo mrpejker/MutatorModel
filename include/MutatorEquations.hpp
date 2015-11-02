@@ -1,165 +1,169 @@
 #ifndef MutatorModel_MutatorEquations_hpp
 #define MutatorModel_MutatorEquations_hpp
 
-#include <array>
 #include <Eigen/Dense>
+#include <SpecialFunctions.hpp>
 
-template< 
-  size_t GenomeLenght_ // number of ordinary genes
->
+template< size_t _GenomeLenght > // number of ordinary genes
 class MutatorEquations {
 private:
-  //! Distribution type
-  using Distribution_t = std::array<double, GenomeLenght_ + 1>;
+  //! Constant parameters of model
+  constexpr static int num_variables_{ 2 * (_GenomeLenght + 1) };  //!< Total number of variables
+  double mutation_rate_P_{ 1.0 };   //!< Mutation rate for ordinary genes of wild type genome
+  double mutation_rate_Q_{ 100.0 }; //!< Mutation rate for ordinary genes of mutator type genome
+  double mutator_gene_transition_rate_P_to_Q_{ 1.0 }; //!< Forward mutation rate for mutator-gene
+  double mutator_gene_transition_rate_Q_to_P_{ 0.0 }; //!< Backward mutation rate for mutator-gene
 
-  //! Representation space dimensions
-  constexpr static size_t rep_space_dims_{ 2 * (GenomeLenght_ + 1) };
-
-public:
-  constexpr static size_t Representation_space_dimensions { rep_space_dims_ };
-
-  //! Define class for system state representation 
-  struct StateVariables
+  //! Convenience typedefs
+  using StateVector_t = Eigen::Matrix< double, -1, 1, 0, num_variables_, 1>;
+  using Distribution_t = Eigen::Matrix< double, (_GenomeLenght + 1), 1>;
+public: 
+  //! Define class for system state representation as an element of vector space
+  struct StateVectorType : StateVector_t
   {
-    //! Representation space dimensions
-    constexpr static size_t size_ { 2 * (GenomeLenght_ + 1) };
-    inline size_t size() const { return size_ };
+    using PlainObjectType = StateVector_t;
 
-    Distribution_t P{ 0.0 }; //Wild type relative frequencies
-    Distribution_t Q{ 0.0 }; //Mutator type relative frequencies
+    Eigen::Map< Distribution_t > P{ this->data() };
+    Eigen::Map< Distribution_t > Q{ this->data() + (_GenomeLenght + 1) };  
 
-    //! Default constructor constructs population of solely wild type with zero mutations
-    StateVariables() {
-      P[0] = 1.0;
-      Q[0] = 0.0;
+    StateVectorType() : StateVector_t(num_variables_, 1) {};
+    StateVectorType(const StateVector_t& val) {
+      *this << val;
     };
 
-    //! Normilize
-    void normilize() {
-      double sum{ 0.0 };
-      for (auto p : P) sum += p;
-      for (auto q : Q) sum += q;
-      for (auto& p : P) p /= sum;
-      for (auto& q : Q) q /= sum;
-    };
-
-    //! Zero based uniform index
-    inline const double& operator[](size_t idx) const {
-      if ((idx < 0) || ( idx >= Representation_space_dimensions)) throw std::out_of_range("index out of range");
-      if (idx < Representation_space_dimensions / 2) return P[idx];
-      return Q[idx - Representation_space_dimensions / 2];
-    };
-
-    //! Zero based uniform index
-    inline double& operator[](size_t idx) {
-      if ((idx < 0) || (idx >= Representation_space_dimensions)) throw std::out_of_range("index out of range");
-      if (idx < Representation_space_dimensions / 2) return P[idx];
-      return Q[idx - Representation_space_dimensions / 2];
-    };
+    operator StateVector_t&() { return static_cast<StateVector_t&>(this); }
+    operator StateVector_t() { return static_cast<StateVector_t>(*this); };
   };
-private:
-  
-  //! Parameters of model
-  constexpr static double mutation_rate_P_{ 1.0 };   // mu 1
-  constexpr static double mutation_rate_Q_{ 100.0 }; // mu 2
-  constexpr static double mutator_gene_transition_rate_P_to_Q_{ 1.0 }; // alpha 1
-  constexpr static double mutator_gene_transition_rate_Q_to_P_{ 0.0 }; // alpha 2
 
+  //! Define class for fitness function representation as an element of vector space
+  struct FitnessVectorType : StateVector_t
+  {
+    Eigen::Map< Distribution_t > f{ this->data() };
+    Eigen::Map< Distribution_t > g{ this->data() + (_GenomeLenght + 1) };
+    
+    FitnessVectorType() : StateVector_t(num_variables_, 1) {};
+  };
+
+  //! Export number of equations and variables
+  constexpr static int NumberOfVariables = num_variables_;
+
+private:
+  //! Fitness function
+  FitnessVectorType fitness_{ };
+  
 public:
-  //! Define functor class for right hand side as algebraic source term
-  struct SourceTerm
+  //! Define algebraic source term  
+  struct SourceTerm : Functor< double, num_variables_, num_variables_ >
   {
   private:
-    //! Number of variables
-    constexpr static size_t n_vars_ { (GenomeLenght_ + 1) };
-
-    //! Matrix type of linear matrix
-    using Matrix_t = Eigen::Matrix<double, 2 * n_vars_, 2 * n_vars_>;
+    constexpr static int n_vars_{ (_GenomeLenght + 1) };
+    double mutation_rate_P_;   //!< Mutation rate for ordinary genes of wild type genome
+    double mutation_rate_Q_; //!< Mutation rate for ordinary genes of mutator type genome
+    double mutator_gene_transition_rate_P_to_Q_; //!< Forward mutation rate for mutator-gene
+    double mutator_gene_transition_rate_Q_to_P_; //!< Backward mutation rate for mutator-gene
 
     //! Fitness function
-    Distribution_t f_{ 0.0 }; //Wild type relative frequencies
-    Distribution_t g_{ 0.0 }; //Mutator type relative frequencies
-  public:
-    //! Default single peak function
-    SourceTerm() {
-      f_[0] = 1.0;
-    };
+    FitnessVectorType fitness_{ };
+  public:   
+    //! Constructor
+    SourceTerm(const FitnessVectorType& fitness, double mu1, double mu2, double alpha1, double alpha2) : 
+      Functor<double, num_variables_, num_variables_>(),            
+      fitness_{ fitness },
+      mutation_rate_P_{ mu1 },
+      mutation_rate_Q_{ mu2 },
+      mutator_gene_transition_rate_P_to_Q_{ alpha1 },
+      mutator_gene_transition_rate_Q_to_P_{ alpha2 }    
+    {};
 
-    //! Function that returns linear matrix components
-    Matrix_t linear_matrix(const StateVariables& state) {
-      Matrix_t mat;
+    //! Function that returns Jacobian matrix components
+    JacobianType df(const StateVectorType& state) const {
+      JacobianType jacobian{ };
       for (int i = 0; i < n_vars_; i++) {
         //R
         for (int j = 0; j < n_vars_; j++) {
-          mat(i, j) = 0; // -f_[j];
-          mat(i + n_vars_, j) = 0; // -f_[j];
-          mat(i, j + n_vars_) = 0; // -g_[j];
-          mat(i + n_vars_, j + n_vars_) = 0;// -g_[j];
+          jacobian(i, j) = -2 * fitness_.f(i) * state.P(j);
+          jacobian(i + n_vars_, j) = -2 * fitness_.f(j) * state.P(j);
+          jacobian(i, j + n_vars_) = -2 * fitness_.g(j) * state.Q(j);
+          jacobian(i + n_vars_, j + n_vars_) = -2 * fitness_.g(j) * state.Q(j);
         };
 
         //A_1
-        mat(i, i + n_vars_) += mutator_gene_transition_rate_P_to_Q_;
-        mat(i + n_vars_, i) += mutator_gene_transition_rate_Q_to_P_;
+        jacobian(i, i + n_vars_) += mutator_gene_transition_rate_Q_to_P_;
+        jacobian(i + n_vars_, i) += mutator_gene_transition_rate_P_to_Q_;
 
         //A_2
-        mat(i, i) += f_[i] - (mutation_rate_P_ + mutator_gene_transition_rate_P_to_Q_);
-        mat(i + n_vars_, i + n_vars_) += g_[i] - (mutation_rate_Q_ + mutator_gene_transition_rate_Q_to_P_);
+        jacobian(i, i) += fitness_.f(i) - (mutation_rate_P_ + mutator_gene_transition_rate_P_to_Q_);
+        jacobian(i + n_vars_, i + n_vars_) += fitness_.g(i) - (mutation_rate_Q_ + mutator_gene_transition_rate_Q_to_P_);
 
         //A_3
         if ((i + 1) < n_vars_) {
-          mat(i, i + 1) += mutation_rate_P_ * (i + 1) / GenomeLenght_;
-          mat(i + n_vars_, i + 1 + n_vars_) += mutation_rate_Q_ * (i + 1) / GenomeLenght_;
+          jacobian(i, i + 1) += mutation_rate_P_ * (i + 1) / _GenomeLenght;
+          jacobian(i + n_vars_, i + 1 + n_vars_) += mutation_rate_Q_ * (i + 1) / _GenomeLenght;
         };
         if ((i - 1) >= 0) {
-          mat(i, i - 1) += mutation_rate_P_ * (GenomeLenght_ - i + 1) / GenomeLenght_;
-          mat(i + n_vars_, i - 1 + n_vars_) += mutation_rate_Q_ * (GenomeLenght_ - i + 1) / GenomeLenght_;
+          jacobian(i, i - 1) += mutation_rate_P_ * (_GenomeLenght - i + 1) / _GenomeLenght;
+          jacobian(i + n_vars_, i - 1 + n_vars_) += mutation_rate_Q_ * (_GenomeLenght - i + 1) / _GenomeLenght;
         };
 
       };
 
-      return mat;
+      return jacobian;
     };
-    
+ 
     //! Function that maps system state into source term
-    StateVariables operator()(const StateVariables& state) {
-      StateVariables source; //Allocate storage for resulting source term
+    StateVectorType operator()(const StateVectorType& state) const {
+      StateVectorType source{ }; //Allocate storage for resulting source term
+      source.setZero();
 
       //! Compute average fittness
-      double R = 0.0;
-      for (auto i = 0; i <= GenomeLenght_; i++) {
-        R += f_[i] * state.P[i] + g_[i] * state.Q[i];
-      };
-
+      double R = fitness_.dot(state);      
+    
       //! Compute source term
-      for (int i = 0; i <= GenomeLenght_; i++) {
+      for (int i = 0; i <= _GenomeLenght; i++) {
         //! Compute mutation process
         if ((i + 1) < n_vars_) {
-          source.P[i] += state.P[i + 1] * mutation_rate_P_ * (i + 1) / GenomeLenght_;
-          source.Q[i] += state.Q[i + 1] * mutation_rate_Q_ * (i + 1) / GenomeLenght_;
+          source.P(i) += state.P(i + 1) * mutation_rate_P_ * (i + 1) / _GenomeLenght;
+          source.Q(i) += state.Q(i + 1) * mutation_rate_Q_ * (i + 1) / _GenomeLenght;
         };
         if ((i - 1) >= 0) {
-          source.P[i] += state.P[i - 1] * mutation_rate_P_ * (GenomeLenght_ - i + 1) / GenomeLenght_;
-          source.Q[i] += state.Q[i - 1] * mutation_rate_Q_ * (GenomeLenght_ - i + 1) / GenomeLenght_;
+          source.P(i) += state.P(i - 1) * mutation_rate_P_ * (_GenomeLenght - i + 1) / _GenomeLenght;
+          source.Q(i) += state.Q(i - 1) * mutation_rate_Q_ * (_GenomeLenght - i + 1) / _GenomeLenght;
         };
 
         //! Compute mutator gene switching process
-        source.P[i] += state.Q[i] * mutator_gene_transition_rate_P_to_Q_;
-        source.Q[i] += state.P[i] * mutator_gene_transition_rate_Q_to_P_;
+        source.P(i) += state.Q(i) * mutator_gene_transition_rate_Q_to_P_;
+        source.Q(i) += state.P(i) * mutator_gene_transition_rate_P_to_Q_;
 
         //! Compute replication process
-        source.P[i] += state.P[i] * (f_[i] - (mutation_rate_P_ + mutator_gene_transition_rate_P_to_Q_));
-        source.Q[i] += state.Q[i] * (g_[i] - (mutation_rate_Q_ + mutator_gene_transition_rate_Q_to_P_));
+        source.P(i) += state.P(i) * (fitness_.f(i) - (mutation_rate_P_ + mutator_gene_transition_rate_P_to_Q_));
+        source.Q(i) += state.Q(i) * (fitness_.g(i) - (mutation_rate_Q_ + mutator_gene_transition_rate_Q_to_P_));
 
         //! Compute selection and normalization term
-        source.P[i] -= state.P[i] * R;
-        source.Q[i] -= state.Q[i] * R;
+        source.P(i) -= state.P(i) * R;
+        source.Q(i) -= state.Q(i) * R;
       };
- 
-      //source.normilize();
+       
       return source; //!< Pass source term outside
     };
 
+  } Source_term;
+
+  //! Constructor with specified mutation rates
+  MutatorEquations(const FitnessVectorType& fitness, double mu1, double mu2, double alpha1, double alpha2) :
+    fitness_{ fitness },
+    mutation_rate_P_{ mu1 },
+    mutation_rate_Q_{ mu2 },
+    mutator_gene_transition_rate_P_to_Q_{ alpha1 },
+    mutator_gene_transition_rate_Q_to_P_{ alpha2 },
+    Source_term(fitness, mu1, mu2, alpha1, alpha2)  
+  {
   };
+
+  //! Accessors
+  auto mutation_rate_P() const { return mutation_rate_P_ };
+  auto mutation_rate_Q() const { return mutation_rate_Q_ };
+  auto mutator_gene_transition_rate_P_to_Q() const { return mutator_gene_transition_rate_P_to_Q_ };
+  auto mutator_gene_transition_rate_Q_to_P() const { return mutator_gene_transition_rate_Q_to_P_ };
 
 };
 

@@ -197,6 +197,7 @@ template<typename MatrixType> class TransposeImpl<MatrixType,Dense>
 template<typename Derived>
 inline Transpose<Derived>
 DenseBase<Derived>::transpose()
+
 {
   return derived();
 }

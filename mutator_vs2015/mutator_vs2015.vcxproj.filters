@@ -13,105 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Alglib">
-      <UniqueIdentifier>{65185b6f-10d5-420e-a4b3-9da36655ca95}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\alglibinternal.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\alglibmisc.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\ap.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\dataanalysis.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\diffequations.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\fasttransforms.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\integration.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\interpolation.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\linalg.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\optimization.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\solvers.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\specialfunctions.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\include\alglib-3.10\src\statistics.cpp">
-      <Filter>Header Files\Alglib</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\LocalDiscontinuousGalerkin.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\MutatorEquations.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\NumericQuadrature.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\alglibinternal.h">
-      <Filter>Header Files\Alglib</Filter>
+    <ClInclude Include="..\include\SpecialFunctions.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\alglibmisc.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\ap.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\dataanalysis.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\diffequations.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\fasttransforms.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\integration.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\interpolation.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\linalg.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\optimization.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\solvers.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\specialfunctions.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\statistics.h">
-      <Filter>Header Files\Alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\alglib-3.10\src\stdafx.h">
-      <Filter>Header Files\Alglib</Filter>
+    <ClInclude Include="..\include\DiscontinuousGalerkin.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
