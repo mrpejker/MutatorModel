@@ -2,9 +2,9 @@
 #define MutatorModel_DiscontinuousGalerkin_hpp
 
 #include <fstream>
-#include <NumericQuadrature.hpp>
-#include <SpecialFunctions.hpp>
-#include <unsupported/Eigen/NonLinearOptimization>
+#include <Algorithms/NumericQuadrature.hpp>
+#include <Algorithms/SpecialFunctions.hpp>
+
 #include <unsupported/Eigen/NumericalDiff>
 #include <unsupported/Eigen/KroneckerProduct>
 
@@ -20,18 +20,39 @@ public:
 private:
   //! Convenience typedefs
   constexpr static int num_variables_expanded_{ NumberOfVariables * _TimeOrder };
-  using StateVectorExpanded_t = Eigen::Matrix< double, _TimeOrder, NumberOfVariables >;
+  using StateVector_t = Eigen::Matrix<double, 1, NumberOfVariables >;
+  using StateVectorExpanded_t = Eigen::Matrix<double, _TimeOrder, NumberOfVariables >;
   using Matrix_t = Eigen::Matrix<double, _TimeOrder, _TimeOrder >;
+  
+  class StateVectorExpandedType : public StateVectorExpanded_t {
+    //! Time extension interval
+    double time_size_{ 1.0 };
+  public:
+    //! Helper function that samples solution at given point in dimensionless time
+    StateVectorType sample_solution(double tau) const {      
+      StateVectorType state{ }; state.setZero(); 
+      for (int i = 0; i < _TimeOrder; i++) {
+        state += row(i) * shifted_legendre(i, tau);
+      };
+      return state;
+    };
+
+    StateVectorExpandedType() {};
+    StateVectorExpandedType(StateVectorExpanded_t&& x) : StateVectorExpanded_t(x) {};
+
+    operator StateVectorExpanded_t&() { return static_cast<StateVectorExpanded_t&>(this); }
+    operator StateVectorExpanded_t() { return static_cast<StateVectorExpanded_t>(*this); };
+  };
 
   //! Internal state representation   
   int current_iteration_{ 0 };
   double current_time_{ 0.0 };
   StateVectorType current_state_{ };
-  StateVectorExpanded_t current_state_expansion_{ };
+  StateVectorExpandedType current_state_expansion_{ };
 
   //! Numerical intergrator object with required order of accuracy
   NumericQuadrature<_TimeOrder + 1> integrate_{ };
-
+   
   //! Equations object
   Equations equations_;
 
@@ -40,17 +61,7 @@ private:
   {  
   private:
     //! Equations object
-    const Equations& equations_;
-
-    //! Helper function that samples solution at given point in time
-    StateVectorType sample_solution_(const InputType &x, double tau) const {
-      Eigen::Map< const StateVectorExpanded_t > solution( x.data() );
-      StateVectorType state{ }; state.setZero();      
-      for (int i = 0; i < _TimeOrder; i++) {        
-        state += solution.row(i) * shifted_legendre(i, tau);
-      };
-      return state;
-    };
+    const Equations& equations_;    
   public:
     
     //! Constant matrices that depend solely on choice of orthogonal basis functions\  
@@ -62,29 +73,28 @@ private:
     //! Constructor
     TargetImplicitIdentity(const Equations& equations) : Functor<double>(num_variables_expanded_, num_variables_expanded_),
       equations_{ equations }
-    {};        
+    {};  
+
 
     //! Jacobian matrix
     int df(const InputType &x, JacobianType &jac) const
     {                
-      auto u = sample_solution_(x, 1.0);
+      auto u = sample_solution(x, 1.0);
       jac = equations_.Source_term.df(u);
       return 0;
     };
      
     //! Relation that must hold for solution
     int operator()(const InputType &x, ValueType &f) const
-    { 
-      auto u = sample_solution_(x, 1.0);
-      f = equations_.Source_term(u);
+    {       
+      auto u = static_cast<StateVectorExpandedType>(x);
+      f = equations_.Source_term(u.sample_solution(1.0));
       return 0;
     }
   } identity_;
 
   //! Main function that integrates underlying equation in time and advances one step
-  StateVectorExpanded_t step_(double dt) {
-    StateVectorExpanded_t result{ current_state_expansion_ };
-
+  StateVectorExpandedType step_(double dt) {    
     //Solve nonlinear system    
     Eigen::NumericalDiff<TargetImplicitIdentity> numDiff(identity_);
     Eigen::NumericalDiff<TargetImplicitIdentity>::JacobianType jac;
@@ -96,22 +106,21 @@ private:
     lm.parameters.maxfev = 2000;
     lm.parameters.xtol = 1.0e-10;
     std::cout << lm.parameters.maxfev << std::endl;
-        
-    Eigen::VectorXd x(num_variables_expanded_); x << result.transpose();
+             
+    Eigen::VectorXd x{ static_cast<StateVectorExpanded_t>(current_state_expansion_) };
     int ret = lm.minimize( x );
-    result << x.transpose();
 
     std::cout << "Optimisation result summary : " << std::endl;
-    std::cout << "state = (" << result << ")" << std::endl;    
+    std::cout << "state = (" << x << ")" << std::endl;    
     std::cout << "iterations : " << lm.iter << std::endl;
 
     TargetImplicitIdentity::ValueType fvalue( num_variables_expanded_ );
-    identity_(result, fvalue);
+    identity_(x, fvalue);
     std::cout << "function value : " << fvalue.transpose() << std::endl;
 
     std::cout << "status : " << ret << std::endl;
 
-    return result;
+    return StateVectorExpandedType(x);
   };
 
 public:
@@ -156,7 +165,7 @@ public:
     current_state_expansion_.setZero();
     current_state_expansion_.row(0) = current_state_;
    
-    StateVectorExpanded_t solution;
+    StateVectorExpandedType solution;
     for (; current_time_ <= time_end;) {
       //advance solution
       solution = step_(time_step);            
@@ -175,7 +184,7 @@ public:
       std::cout << current_state_.Q << std::endl;
     };
 
-    return current_state_;
+    return current_state_; 
   }; 
   
 };

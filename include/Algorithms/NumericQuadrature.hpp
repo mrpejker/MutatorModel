@@ -10,19 +10,10 @@ namespace numerics_internal {
 
 
 //! Compute Gauss integral
-template< int Order >
+template< int Order = 0 >
 struct NumericQuadrature {
 private:
   //Should never be compiled
-  template<class F>
-  double operator()(F f, double a, double b) {
-    return 0;
-  };
-};
-
-template<>
-struct NumericQuadrature< 0 > {
-private:
   template<class F>
   double operator()(F f, double a, double b) {
     return 0;
