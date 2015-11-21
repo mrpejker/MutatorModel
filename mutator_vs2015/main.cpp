@@ -17,25 +17,16 @@ int main(int argc, char *argv[]) {
     using Equations = MutatorEquations<1>;
     using StateVectorType = Equations::StateVectorType;
     using FitnessVectorType = Equations::FitnessVectorType;
-    using SourceTerm = Equations::SourceTerm;
-
-    using NonlinearSolver = utility::NonlinearSolver<double>;
-    NonlinearSolver nsolver;
-    NonlinearSolver::InputType x(1, 1);
-    x << 0.12;
-    ShiftedLegendre<2> f{ };
-    NonlinearSolver::ResultStatusType status = nsolver.solve(f, x);
-    std::cout << " x = " << x << std::endl;
-    
+    using SourceTerm = Equations::SourceTerm;        
     //using Solver = DiscontinuousGalerkin<Equations, 1>;
+    using NonlinearSolver = utility::NonlinearSolver<double>;
 
     //Specify equations parameters
     FitnessVectorType fitness;
     fitness <<
       1.0, 0.0, // wild type
       1.0, 0.0; // mutator type
-    std::cout << " fitness = " << std::endl;
-    std::cout << fitness << std::endl;
+    std::cout << " fitness = " << fitness.transpose() << std::endl;
     Equations equations(fitness, 
       1.0, //
       50.0, //
@@ -47,27 +38,21 @@ int main(int argc, char *argv[]) {
     StateVectorType u{ };    
     u.setZero();
     //u.P(0) = 1.0;
-    //u.Q << 0.52, 0.48;    
-    std::cout << " P = " << std::endl;
-    std::cout << u.P << std::endl;
-    std::cout << " Q = " << std::endl;
-    std::cout << u.Q << std::endl;
-
-    std::cout << " S(u_0) = " << std::endl;
-    std::cout << equations.Source_term(u) << std::endl;
-
+    u.Q << 0.52, 0.48;    
+    std::cout << " P = " << u.P.transpose() << std::endl;
+    std::cout << " Q = " << u.Q.transpose() << std::endl;
+    std::cout << " S(u_0) = " << equations.Source_term(u).transpose() << std::endl;
     std::cout << " dS(u_0)/du = " << std::endl;
     std::cout << equations.Source_term.df(u) << std::endl;
 
     //Nonlinear solver
+    NonlinearSolver nsolver{ };
     //Eigen::NumericalDiff<VectorFunction<double>> numdiff(equations.Source_term);
-    /*NonlinearSolver::ResultStatusType status = nsolver.solve(equations.Source_term, u);
+    NonlinearSolver::ResultStatusType status = nsolver.solve(equations.Source_term, u);
 
-    std::cout << " S(u_0) = " << std::endl;
-    std::cout << equations.Source_term(u) << std::endl;
-
-    std::cout << " dS(u_0)/du = " << std::endl;
-    std::cout << equations.Source_term.df(u) << std::endl;*/
+    std::cout << " P = " << u.P.transpose() << std::endl;
+    std::cout << " Q = " << u.Q.transpose() << std::endl;
+    std::cout << " S(u_0) = " << equations.Source_term(u).transpose() << std::endl;
     
     //Solver solver(equations); // Instantiate solver algorithm object
     //    
@@ -77,6 +62,7 @@ int main(int argc, char *argv[]) {
     //auto result = solver.solve(0.0, 0.0, time_step, u);    
 
     // Output result
+
 
     std::cout << "press [ENTER] to continue " << std::endl;
     std::cin.get();
