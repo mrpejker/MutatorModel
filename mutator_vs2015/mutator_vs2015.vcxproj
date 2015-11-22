@@ -126,12 +126,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\Algorithms\DiscontinuousGalerkin.hpp" />
+    <ClInclude Include="..\include\Algorithms\DiscontinuousGalerkinPredictor.hpp" />
     <ClInclude Include="..\include\Algorithms\NonlinearSolver.hpp" />
     <ClInclude Include="..\include\Algorithms\NumericQuadrature.hpp" />
-    <ClInclude Include="..\include\Algorithms\SpecialFunctions.hpp" />
+    <ClInclude Include="..\include\Concepts\OrthogonalBasis.hpp" />
     <ClInclude Include="..\include\Concepts\VectorFunction.hpp" />
     <ClInclude Include="..\include\Equations\MutatorEquations.hpp" />
+    <ClInclude Include="..\include\OrthogonalBasis\ShiftedLegendreBasis.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

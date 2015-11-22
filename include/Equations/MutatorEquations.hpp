@@ -2,7 +2,6 @@
 #define MutatorModel_MutatorEquations_hpp
 
 #include <Eigen/Dense>
-#include <Algorithms/SpecialFunctions.hpp>
 #include <Concepts/VectorFunction.hpp>
 
 template< size_t _GenomeLenght > // number of ordinary genes
@@ -32,10 +31,6 @@ public:
 
     operator StateVector_t&() { return static_cast<StateVector_t&>(this); }
     operator StateVector_t() { return static_cast<StateVector_t>(*this); }; 
-
-    void normilize() {
-      static_cast<StateVector_t>(this).normalize();
-    };
   };
 
   //! Define class for fitness function representation as an element of vector space
@@ -109,10 +104,10 @@ public:
         };
 
         //! Penalize
-       /* if (state.P(i) > 1.0) jacobian(i, i) += std::exp(state.P(i) - 1.0);
+        if (state.P(i) > 1.0) jacobian(i, i) += std::exp(state.P(i) - 1.0);
         if (state.P(i) < 0.0) jacobian(i, i) += std::exp(-state.P(i));
         if (state.Q(i) > 1.0) jacobian(i + n_vars_, i + n_vars_) += std::exp(state.Q(i) - 1.0);
-        if (state.Q(i) < 0.0) jacobian(i + n_vars_, i + n_vars_) += std::exp(-state.Q(i));*/
+        if (state.Q(i) < 0.0) jacobian(i + n_vars_, i + n_vars_) += std::exp(-state.Q(i));
       };
 
       return jacobian;
@@ -151,10 +146,10 @@ public:
         source.Q(i) -= state.Q(i) * R;
 
         //! Penalize
-       /* if (state.P(i) > 1.0) source(i) += std::exp(state.P(i) - 1.0) - 1.0;
+        if (state.P(i) > 1.0) source(i) += std::exp(state.P(i) - 1.0) - 1.0;
         if (state.P(i) < 0.0) source(i) += std::exp(-state.P(i)) - 1.0;
         if (state.Q(i) > 1.0) source(i) += std::exp(state.Q(i) - 1.0) - 1.0;
-        if (state.Q(i) < 0.0) source(i) += std::exp(-state.Q(i)) - 1.0;*/
+        if (state.Q(i) < 0.0) source(i) += std::exp(-state.Q(i)) - 1.0;
       };
        
       return source; //!< Pass source term outside

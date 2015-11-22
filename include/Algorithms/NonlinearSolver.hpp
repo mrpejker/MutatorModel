@@ -30,7 +30,7 @@ namespace utility {
       LevenbergMarquardtSpace::Status status{ };
       VectorXd& xRef = static_cast<VectorXd&>(x);
 
-      for (int outer_iteration = 0; outer_iteration < 10; outer_iteration++) {
+      for (int outer_iteration = 0; outer_iteration < 100; outer_iteration++) {
 
         //Optimisation cycle
         status = lm.minimizeInit(xRef);
