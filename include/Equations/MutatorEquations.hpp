@@ -48,7 +48,7 @@ public:
   template <typename F>
   FitnessFunction(F fitness) {
     for (int i = 0; i < NumberOfGenes; i++) {
-      auto x = (1.0*i) / _GenomeLenght;
+      auto x = 1.0 - (2.0*i) / _GenomeLenght;
       std::pair<double, double> res = fitness(x);
       fitness_[i] = std::move(res.first);
       fitness_[i + NumberOfGenes] = std::move(res.second);
@@ -169,7 +169,6 @@ public:
         };
       };
 
-      std::cout << "Debug fvec : " << fvec.tostring(2) << std::endl;
       return;
     }; // operator()
 
