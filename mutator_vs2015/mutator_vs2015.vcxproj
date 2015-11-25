@@ -120,18 +120,45 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\Alglib\alglibinternal.cpp" />
+    <ClCompile Include="..\include\Alglib\alglibmisc.cpp" />
+    <ClCompile Include="..\include\Alglib\ap.cpp" />
+    <ClCompile Include="..\include\Alglib\dataanalysis.cpp" />
+    <ClCompile Include="..\include\Alglib\diffequations.cpp" />
+    <ClCompile Include="..\include\Alglib\fasttransforms.cpp" />
+    <ClCompile Include="..\include\Alglib\integration.cpp" />
+    <ClCompile Include="..\include\Alglib\interpolation.cpp" />
+    <ClCompile Include="..\include\Alglib\linalg.cpp" />
+    <ClCompile Include="..\include\Alglib\optimization.cpp" />
+    <ClCompile Include="..\include\Alglib\solvers.cpp" />
+    <ClCompile Include="..\include\Alglib\specialfunctions.cpp" />
+    <ClCompile Include="..\include\Alglib\statistics.cpp" />
     <ClCompile Include="main.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\include;..\include\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\include;..\include\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\Alglib\alglibinternal.h" />
+    <ClInclude Include="..\include\Alglib\alglibmisc.h" />
+    <ClInclude Include="..\include\Alglib\ap.h" />
+    <ClInclude Include="..\include\Alglib\dataanalysis.h" />
+    <ClInclude Include="..\include\Alglib\diffequations.h" />
+    <ClInclude Include="..\include\Alglib\fasttransforms.h" />
+    <ClInclude Include="..\include\Alglib\integration.h" />
+    <ClInclude Include="..\include\Alglib\interpolation.h" />
+    <ClInclude Include="..\include\Alglib\linalg.h" />
+    <ClInclude Include="..\include\Alglib\optimization.h" />
+    <ClInclude Include="..\include\Alglib\solvers.h" />
+    <ClInclude Include="..\include\Alglib\specialfunctions.h" />
+    <ClInclude Include="..\include\Alglib\statistics.h" />
+    <ClInclude Include="..\include\Alglib\stdafx.h" />
     <ClInclude Include="..\include\Algorithms\DiscontinuousGalerkinPredictor.hpp" />
     <ClInclude Include="..\include\Algorithms\NonlinearSolver.hpp" />
     <ClInclude Include="..\include\Algorithms\NumericQuadrature.hpp" />
+    <ClInclude Include="..\include\BasisFunctions\ShiftedLegendreBasis.hpp" />
     <ClInclude Include="..\include\Concepts\VectorFunction.hpp" />
     <ClInclude Include="..\include\Equations\MutatorEquations.hpp" />
-    <ClInclude Include="..\include\OrthogonalBasis\ShiftedLegendreBasis.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

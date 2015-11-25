@@ -22,13 +22,52 @@
     <Filter Include="Header Files\Algorithms">
       <UniqueIdentifier>{c21d370e-80cf-46f4-a123-6fef10bb8f12}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\OrthogonalBasis">
-      <UniqueIdentifier>{7a89c528-3d06-496d-b7e9-9e71ecb612a1}</UniqueIdentifier>
+    <Filter Include="Header Files\Alglib">
+      <UniqueIdentifier>{565328a6-4908-4cf9-aa7a-219806468a95}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\alglibinternal.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\alglibmisc.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\ap.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\dataanalysis.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\diffequations.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\fasttransforms.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\integration.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\interpolation.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\linalg.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\optimization.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\solvers.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\specialfunctions.cpp">
+      <Filter>Header Files\Alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\include\Alglib\statistics.cpp">
+      <Filter>Header Files\Alglib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -47,8 +86,50 @@
     <ClInclude Include="..\include\Algorithms\DiscontinuousGalerkinPredictor.hpp">
       <Filter>Header Files\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\OrthogonalBasis\ShiftedLegendreBasis.hpp">
-      <Filter>Header Files\OrthogonalBasis</Filter>
+    <ClInclude Include="..\include\BasisFunctions\ShiftedLegendreBasis.hpp">
+      <Filter>Header Files\Concepts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\alglibinternal.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\alglibmisc.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\ap.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\dataanalysis.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\diffequations.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\fasttransforms.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\integration.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\interpolation.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\linalg.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\optimization.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\solvers.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\specialfunctions.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\statistics.h">
+      <Filter>Header Files\Alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Alglib\stdafx.h">
+      <Filter>Header Files\Alglib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

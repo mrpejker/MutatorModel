@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <Algorithms/NumericQuadrature.hpp>
-#include <OrthogonalBasis/ShiftedLegendreBasis.hpp>
+#include <BasisFunctions/ShiftedLegendreBasis.hpp>
 
 #include <unsupported/Eigen/NumericalDiff>
 #include <unsupported/Eigen/KroneckerProduct>
@@ -82,8 +82,7 @@ public:
   };
 
 private:
-  struct TargetImplicitIdentity : public concepts::VectorFunction<double, NumberOfVariablesExpanded, NumberOfVariablesExpanded>
-  {  
+  struct TargetImplicitIdentity  {  
   private:
     //! Equations object
     const Equations& equations_;
