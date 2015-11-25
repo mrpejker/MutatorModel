@@ -47,9 +47,6 @@
     <ClInclude Include="..\include\Algorithms\DiscontinuousGalerkinPredictor.hpp">
       <Filter>Header Files\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Concepts\OrthogonalBasis.hpp">
-      <Filter>Header Files\Concepts</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\OrthogonalBasis\ShiftedLegendreBasis.hpp">
       <Filter>Header Files\OrthogonalBasis</Filter>
     </ClInclude>

@@ -67,7 +67,7 @@ public:
         Scalar epsfcn;
     };
 
-    typedef Matrix< Scalar, Dynamic, 1 > FVectorType;
+    typedef typename FunctorType::InputType FVectorType;
     typedef Matrix< Scalar, Dynamic, Dynamic > JacobianType;
 
     LevenbergMarquardtSpace::Status lmder1(

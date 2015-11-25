@@ -4,43 +4,39 @@
 #include <exception>
 #include <cmath>
 
-#include <Concepts\VectorFunction.hpp>
-
-using namespace concepts;
-
-namespace impl {
-  struct ShiftedLegendreBase {
-    virtual double df(const double& x) = 0;
-    virtual double operator()(const double& x) = 0;
-  };
-} //namespace internal
+#include <Eigen/Core>
 
 //Legendre polynomials
-template< int _Order = -1 >
+template< typename T, int _Order = -1 >
 struct ShiftedLegendre {
 private:
-  std::vector<double> w
+  int order_;
+  std::vector<double> coef_; // polynomial coefficients
 public:
-  ShiftedLegendre(int order) {
+  ShiftedLegendre(int order) : order_(order) {    
+    switch (order) {
+    case 0: { coef_ = { 1.0 }; break; }
+    case 1: { coef_ = { 2.0, -1.0 }; break; }
+    case 2: { coef_ = { 6.0, -6.0, 1.0 }; break; }
+    default: {
+      throw std::exception("Unsupported order of shifted Legendre polynomial");
+    };
+    };
   };
-};
 
-template<>
-struct ShiftedLegendre<0> {
-  double df(const double& x) { return 0; };
-  double operator()(const double& x) { return 1.0; };
-};
+  ShiftedLegendre() : ShiftedLegendre(0) {};
 
-template<>
-struct ShiftedLegendre<1> {
-  double df(const double& x) { return 2; };
-  double operator()(const double& x) { return 2 * x - 1.0; };
-};
-
-template<>
-struct ShiftedLegendre<2> {
-  double df(const double& x) { return 12 * x - 6; };
-  double operator()(const double& x) { return 6 * x*x - 6 * x + 1; };
+  double df(const T& x) const { 
+    T result{ 0 };
+    for (int i = 0; i < order_; i++) { result = result * x + coef_[i] * (order_ - i); };
+    return result;
+  };
+  
+  double operator()(const T& x) const {
+    T result{ 0 };
+    for (int i = 0; i <= order_; i++) { result = result * x + coef_[i]; };
+    return result;   
+  };
 };
 
 //Shifted Legendre polynomials basis
@@ -49,50 +45,20 @@ struct ShiftedLegendreBasis {
   //! Get number of functions in basis
   inline int size() { return _Size; };
 
-  //! Indexing operator that returns basis functions
-  std::function<double(double)> operator[](int order) const {
-    switch (order) {
-      case 0: return static_cast<std::function<double(double)>>(ShiftedLegendre<0>());
-      case 1: return static_cast<std::function<double(double)>>(ShiftedLegendre<1>());
-      case 2: return static_cast<std::function<double(double)>>(ShiftedLegendre<2>());
-      default: {
-        throw std::exception{ };
-      };
+  //! Basis functions intself
+  std::array<ShiftedLegendre<double>, _Size> functions{ };
+
+  //! Constructor
+  ShiftedLegendreBasis() {
+    for (int i = 0; i < size(); i++) {
+      functions[i] = ShiftedLegendre<double>(i);
     };
   };
 
 private:
   //Delete explicitly some constructors
-  ShiftedLegendreBasis() = delete;
   ShiftedLegendreBasis(const ShiftedLegendreBasis&) = delete;
   ShiftedLegendreBasis(ShiftedLegendreBasis&&) = delete;
-public: 
-
 };
-
-//template<int N, int... Rest>
-//struct ShiftedLegendreBasis_impl {
-//  static constexpr auto& value = ShiftedLegendreBasis_impl<N - 1, N, Rest...>::value;
-//};
-//
-//template<int... Rest>
-//struct ShiftedLegendreBasis_impl<0, Rest...> {
-//  static constexpr VectorFunction<double,1,1> value[] = { ShiftedLegendre<0>, Rest... };
-//};
-//
-//template<int... Rest>
-//constexpr VectorFunction<double,1,1> ShiftedLegendreBasis_impl<0, Rest...>::value[];
-//
-//template<int N>
-//struct ShiftedLegendreBasis {
-//  static_assert(N >= 0, "N must be at least 0");
-//
-//  static constexpr auto& value = ShiftedLegendreBasis_impl<N>::value;
-//
-//  ShiftedLegendreBasis() = delete;
-//  ShiftedLegendreBasis(const ShiftedLegendreBasis&) = delete;
-//  ShiftedLegendreBasis(ShiftedLegendreBasis&&) = delete;
-//};
-
 
 #endif

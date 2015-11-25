@@ -27,10 +27,10 @@ struct VectorFunction
   int inputs() const { return m_inputs; }
   int values() const { return m_values; }  
 
-  int operator()(const InputType &x, ValueType& fvec) { return 0; };
+  //int operator()(const InputType &x, ValueType& fvec) { return 0; };
   // should be defined in derived classes
 
-  int df(const InputType &x, JacobianType& fjac) { return 0; };
+  //int df(const InputType &x, JacobianType& fjac) { return 0; };
   // should be defined in derived classes
 }; 
 

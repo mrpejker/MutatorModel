@@ -8,87 +8,105 @@
 #include <unsupported/Eigen/NumericalDiff>
 #include <unsupported/Eigen/KroneckerProduct>
 
+using namespace Eigen;
+
 template < typename _Equations, int _TimeOrder >
 class DiscontinuousGalerkinPredictor {
-
 public:
-  //! Associated types
-  using Equations = _Equations;
-  using StateVectorType = typename Equations::StateVectorType;  
-  using SourceTerm = typename Equations::SourceTerm;
 
   //! Compile time constants
   constexpr static int TimeOrder{ _TimeOrder };
-  constexpr static int NumberOfVariables{ Equations::NumberOfVariables };
+  constexpr static int NumberOfVariables { _Equations::NumberOfVariables };
+  constexpr static int NumberOfVariablesExpanded{ NumberOfVariables * TimeOrder };
+
+  //! Associated types
+  using Equations = _Equations;
+  using Solution = typename Equations::SolutionType;
+  using SourceTerm = typename Equations::SourceTerm;
+  using BasisFunctions = typename ShiftedLegendreBasis< TimeOrder >;
 private:
   //! Equations object
   Equations equations_;
 
   //! Basis functions
-  ShiftedLegendreBasis< TimeOrder > basis_functions_{ };
+  BasisFunctions basis_{ };
 
   //! Numerical intergrator object with required order of accuracy
-  NumericQuadrature<TimeOrder + 1> integrate_{ };
-
-  //! Convenience typedefs
-  constexpr static int num_variables_expanded_{ NumberOfVariables * TimeOrder };
-  using StateVector_t = Eigen::Matrix<double, 1, NumberOfVariables >;
-  using StateVectorExpanded_t = Eigen::Matrix<double, TimeOrder, NumberOfVariables >;
-  using Matrix_t = Eigen::Matrix<double, TimeOrder, TimeOrder >;
+  NumericQuadrature<TimeOrder + 1> integrate_{ };      
 public:
 
+  const BasisFunctions& basis() const { return basis_; };
+
   //! Class that represents time solution
-  class TimeExpandedSolution {
-    //! Basis functions reference
-    ShiftedLegendreBasis< TimeOrder > basis_functions_{ };
+  class TimeExpandedSolution : public Matrix<double, TimeOrder, NumberOfVariables > {
+    using Base = typename Matrix<double, TimeOrder, NumberOfVariables >;   
 
     //! Time extension interval
     double time_size_{ 1.0 };
-
-    //! Coefficients of decomposition
-    Eigen::Matrix<double, TimeOrder, NumberOfVariables > coefficients_{ };
-
-  public:
-    //! Get size
-    int size() const { return coefficients_.SizeAtCompileTime };
-
-    //! Get flattened coefficients vector
-    Eigen::VectorXd vector() { 
-      return Eigen::Map<Eigen::VectorXd>(coefficients_.data(), coefficients_.SizeAtCompileTime); 
-    };
-
+  public:          
     //! Helper function that samples solution at given point in dimensionless time
-    StateVectorType sample_solution(double tau) const {      
-      StateVectorType state{ }; state.setZero();  
+    Solution sample_solution(double tau, const BasisFunctions& basis) const {
+      Solution state{ }; state.setZero();  
       for (int i = 0; i < _TimeOrder; i++) {
-        state += coefficients_.row(i) * basis_functions_[i](tau);
+        state += row(i) * basis.functions[i](tau);
       };
       return state;
     };
 
     //! Construct solution from initial conditions
-    TimeExpandedSolution(const StateVectorType& x) {
-      coefficients_.setZero();
-      coefficients_.row(0) = x;
+    TimeExpandedSolution(const Solution& x) {
+      setZero();
+      row(0) = x;
     };
+
+    //! Copy constructor
+    //TimeExpandedSolution(const TimeExpandedSolution& other) : coefficients_(other.coeff()) { };
+    //TimeExpandedSolution(TimeExpandedSolution&&) = delete;
+
+    //! Default constructor
+    TimeExpandedSolution(void) : Base() {}
+
+    //! This constructor allows you to construct TimeExpandedSolution from Eigen expressions
+    template<typename OtherDerived>
+    TimeExpandedSolution(const Eigen::MatrixBase<OtherDerived>& other)
+      : Base(other)
+    { }
+
+    // This method allows you to assign Eigen expressions to MutatorEquationsSolution
+    template<typename OtherDerived>
+    TimeExpandedSolution & operator= (const Eigen::MatrixBase <OtherDerived>& other)
+    {
+      this->Base::operator=(other);
+      return *this;
+    }
   };
 
 private:
-  struct TargetImplicitIdentity : VectorFunction<double>
+  struct TargetImplicitIdentity : public concepts::VectorFunction<double, NumberOfVariablesExpanded, NumberOfVariablesExpanded>
   {  
   private:
     //! Equations object
-    const Equations& equations_;    
+    const Equations& equations_;
+    const BasisFunctions& basis_;
   public:
-    //! Constant matrices that depend solely on choice of orthogonal basis functions\  
-    Matrix_t M; //! Mass matrix
+    //! Time step
+    double dt;
+
+    //! Solution at time \tau = 0
+    Solution initialCondtions;
+
+    //! Constant matrices that depend solely on choice of orthogonal basis functions    
+    using Matrix_t = Eigen::Matrix<double, TimeOrder, TimeOrder >;    
+    Matrix_t M;
     Matrix_t KTime; //! Temporal stiffness matrix
     Matrix_t FluxTime0; //! Time direction flux matrix at t = 0.0
     Matrix_t FluxTime1; //! Time direction flux matrix at t = 1.0
 
     //! Constructor
-    TargetImplicitIdentity(const Equations& equations) : VectorFunction<double>(num_variables_expanded_, num_variables_expanded_),
-      equations_{ equations }
+    TargetImplicitIdentity(const Equations& equations, const BasisFunctions& basis) : 
+      concepts::VectorFunction<double, NumberOfVariablesExpanded, NumberOfVariablesExpanded>(),
+      equations_{ equations }, 
+      basis_{ basis }
     {};  
 
     //! Jacobian matrix
@@ -102,8 +120,13 @@ private:
     //! Relation that must hold for solution
     int operator()(const InputType &x, ValueType &f) const
     {       
-      auto u = static_cast<StateVectorExpandedType>(x);
-      f = equations_.Source_term(u.sample_solution(1.0));
+      const TimeExpandedSolution& u = Map<TimeExpandedSolution>(x.data(), TimeOrder, NumberOfVariables);
+      for (int i = 0; i < TimeOrder; i++) {
+        for (int p = 0; p < NumberOfVariables; p++) {
+
+        };
+      };
+      f = equations_.Source_term(u.sample_solution(1.0, basis_));
       return 0;
     }
   } identity_;
@@ -112,40 +135,58 @@ public:
 
   //! Initialize solver
   DiscontinuousGalerkinPredictor(const Equations& equations) : equations_(equations),
-    identity_{ equations }
+    identity_{ equations, basis_ }
   {
-    //Instantiate basis functions
-    for (int i = 0; i <= TimeOrder; i++) basis_functions_[i] = shifted_legendre(i);
-
     //Compute M matrix
     for (int i = 0; i < _TimeOrder; i++)
       for (int j = 0; j < _TimeOrder; j++) {
         // Compute matrix elements
-        //identity_.M(i, j) = integrate_([&] (double tau) { return shifted_legendre(i, tau) * shifted_legendre(j, tau); }, 0.0, 1.0);
-        //identity_.KTime(i, j) = integrate_([&] (double tau) { return shifted_legendre_derivative(i, tau) * shifted_legendre(j, tau); }, 0.0, 1.0);
-        //identity_.FluxTime0(i, j) = shifted_legendre(i)(0.0) * shifted_legendre(j)(0.0);
-        //identity_.FluxTime1(i, j) = shifted_legendre(i)(1.0) * shifted_legendre(j)(1.0);
+        identity_.M(i, j) = integrate_([&] (double tau) { return basis_.functions[i](tau) * basis_.functions[j](tau); }, 0.0, 1.0);
+        identity_.KTime(i, j) = integrate_([&] (double tau) { return basis_.functions[i].df(tau) * basis_.functions[j](tau); }, 0.0, 1.0);
+        identity_.FluxTime0(i, j) = basis_.functions[i](0.0) * basis_.functions[j](0.0);
+        identity_.FluxTime1(i, j) = basis_.functions[i](1.0) * basis_.functions[j](1.0);
       };
 
     //Debug output
-    std::cout << "M matrix : " << std::endl;
+    /*std::cout << "M matrix : " << std::endl;
     std::cout << identity_.M << std::endl;
     std::cout << "KTime matrix : " << std::endl;
     std::cout << identity_.KTime << std::endl;
     std::cout << "FluxTime0 matrix : " << std::endl;
     std::cout << identity_.FluxTime0 << std::endl;
     std::cout << "FluxTime1 matrix : " << std::endl;
-    std::cout << identity_.FluxTime1 << std::endl; 
+    std::cout << identity_.FluxTime1 << std::endl; */
   };
 
 public:
 
 
   //! Main function that integrates underlying equation in time
-  TimeExpandedSolution solve(double time_step, const TimeExpandedSolution& solution) {
-    
+  TimeExpandedSolution solve(double time_step, const TimeExpandedSolution& expanded_solution) {
+    identity_.dt = time_step;
+    identity_.initialCondtions = expanded_solution.sample_solution(0.0, basis_);
 
-    return solution;
+    //LevenbergMarquardt<TargetImplicitIdentity, double> lm(identity_);
+    //lm.parameters.maxfev = 2000;
+    ////lm.parameters.xtol = 1.0e-14;
+    ////lm.parameters.ftol = 1.0e-14;
+    ////lm.parameters.gtol = 1.0e-14;
+    ////lm.parameters.epsfcn = 0.0;
+    ////lm.parameters.factor = 10.0;     
+    //    
+    //LevenbergMarquardtSpace::Status status{ };
+    //Map<TargetImplicitIdentity::InputType> xRef(expanded_solution.coeff(),
+    //  NumberOfVariablesExpanded,1);
+    //status = lm.minimizeInit(xRef);
+
+    //if (status == LevenbergMarquardtSpace::ImproperInputParameters)
+    //  return status;
+    //do {
+    //  status = lm.minimizeOneStep(xRef);
+    //  std::cout << "Iter : " << lm.iter << " Solution : " << xRef.transpose() << std::endl;
+    //} while (status == LevenbergMarquardtSpace::Running);
+
+    return expanded_solution;
   }; 
   
 };

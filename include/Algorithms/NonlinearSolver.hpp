@@ -18,7 +18,7 @@ namespace utility {
     using ResultStatusType = LevenbergMarquardtSpace::Status;
 
     template< typename T >
-    ResultStatusType solve(T& vf, InputType& x) {
+    ResultStatusType solve(T& vf, typename T::InputType& x) {
       LevenbergMarquardt<T, Scalar> lm(vf);
       lm.parameters.maxfev = 2000;
       //lm.parameters.xtol = 1.0e-14;
@@ -28,7 +28,8 @@ namespace utility {
       //lm.parameters.factor = 10.0;     
       
       LevenbergMarquardtSpace::Status status{ };
-      VectorXd& xRef = static_cast<VectorXd&>(x);
+      auto xRef = x;
+      //VectorXd& xRef = static_cast<VectorXd&>(x);
 
       for (int outer_iteration = 0; outer_iteration < 100; outer_iteration++) {
 
