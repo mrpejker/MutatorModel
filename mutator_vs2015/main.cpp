@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
    
   try {
     std::cout << std::scientific;
-    const int N{ 1000 };
+    const int N{ 500 };
     using Equations = MutatorEquations<N>;
     using Solution = Equations::SolutionType;    
     using SourceTerm = Equations::SourceTerm<false>;        
@@ -21,15 +21,15 @@ int main(int argc, char *argv[]) {
     //Specify equations parameters
     Equations::Parameters params{ };
     double J{ 1.0 };
-    double a{ 2.0e-2 };
-    double mu{ 10 };
+    double a{ 1.0 };
+    double mu{ 0.5 };
     //params.fitness_function_ = [&] (double x) { return (x == 0) ? std::pair<double, double>(J, J) : std::pair<double, double>(0, 0); };
-    //params.fitness_function_ = [&] (double x) { return std::pair<double, double>(3*x*x/2, 3*x*x/2); };
-    params.fitness_function_ = [&] (double x) { return std::pair<double, double>(0.3*x, 0.3*x); };
+    params.fitness_function_ = [&] (double x) { return std::pair<double, double>(3*x*x/2, 3*x*x/2); };
+    //params.fitness_function_ = [&] (double x) { return std::pair<double, double>(0.3*x, 0.3*x); };
     params.mutation_rate_P = 1.0;
     params.mutation_rate_Q = mu;
     params.mutator_gene_transition_rate_P_to_Q = a;
-    params.mutator_gene_transition_rate_Q_to_P = 0.0;
+    params.mutator_gene_transition_rate_Q_to_P = a;
 
     Equations equations(params);
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     
     int max_iter = 100000;
     double max_time = 10000.0;
-    double time_step = 3.0e-2;
+    double time_step = 1.0e-1;
 
     //Current state information   
     int current_iteration{ 0 };
