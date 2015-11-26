@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     //Specify equations parameters
     Equations::Parameters params{ };
     double J{ 1.0 };
-    double a{ 1.0e-5 };
+    double a{ 2.0e-2 };
     double mu{ 10 };
     //params.fitness_function_ = [&] (double x) { return (x == 0) ? std::pair<double, double>(J, J) : std::pair<double, double>(0, 0); };
     //params.fitness_function_ = [&] (double x) { return std::pair<double, double>(3*x*x/2, 3*x*x/2); };
@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
     params.mutation_rate_Q = mu;
     params.mutator_gene_transition_rate_P_to_Q = a;
     params.mutator_gene_transition_rate_Q_to_P = 0.0;
-
 
     Equations equations(params);
 
@@ -46,12 +45,7 @@ int main(int argc, char *argv[]) {
     x.setcontent(Equations::NumberOfVariables, u.data());
     real_1d_array dxdt;
     dxdt.setlength(Equations::NumberOfVariables);
-
-    //Steady state computation
-    //utility::NonlinearSolver<SourceTerm> nsolver( source );
-    //nsolver.solve(x);
-    //std::cout << "Solution x = " << x.tostring(2) << std::endl;
-    
+       
     // Time accurate solution solver algorithm
     //using Predictor = DiscontinuousGalerkinPredictor<Equations, 1>;
     //using TimeExpandedSolution = Predictor::TimeExpandedSolution;
@@ -59,30 +53,28 @@ int main(int argc, char *argv[]) {
     
     int max_iter = 100000;
     double max_time = 10000.0;
-    double time_step = 1.0e-2;
+    double time_step = 3.0e-2;
 
     //Current state information   
     int current_iteration{ 0 };
     double current_time{ 0.0 };
-    Solution current_state { u };
+    Solution current_state { u };    
 
+    //Open results file
     //std::ofstream ofs("result.dat");
-    //TimeExpandedSolution solution{ current_state };
-
-    //////Output initial conditions and source term
-    ////source(solution.sample_solution(0.0), S);
-    ////std::cout << S.transpose() << std::endl;
-
-    std::ofstream ofs("result.dat");
-    ofs << R"(VARIABLES = "iteration", "R", "q", "s" )" << std::endl;
+    //ofs << R"(VARIABLES = "iteration", "R", "q", "s" )" << std::endl;
 
     for (; current_time <= max_time;) {
       //  //advance solution
       //  DG_predictor.solve( time_step, solution );
       
       source(x, dxdt);
+      
       for (int i = 0; i < Equations::NumberOfVariables; i++) {
-        x[i] += dxdt[i] * time_step;
+        double new_x = x[i] + dxdt[i] * time_step;
+        if (new_x < 0.0) throw std::exception("Time step too big");
+        if (new_x > 1.0) throw std::exception("Time step too big");
+        x[i] = new_x;
       };
       
       //update state      
@@ -92,42 +84,7 @@ int main(int argc, char *argv[]) {
         current_state[i] = x[i];
       };
       current_time += time_step;
-      current_iteration++;
-
-      //obtain characteristics of interest
-      double R = 0;
-      double s = 0;
-      double s1 = 0;
-      double s2 = 0;
-      double sumP = 0;
-      double sumQ = 0;
-      for (int i = 0; i < Equations::NumberOfGenes; i++) {
-        double x = 1.0 - (2.0*i) / N;
-        s1 += current_state.P(i) * x;
-        s2 += current_state.Q(i) * x;
-        s += current_state.P(i) * x + current_state.Q(i) * x;
-        R += (current_state.P(i) * params.fitness_function_.f(i) + current_state.Q(i) * params.fitness_function_.g(i));
-        sumP += current_state.P(i);
-        sumQ += current_state.Q(i);
-      };
-      s1 /= sumP;
-      s2 /= sumQ;
-      s /= (sumP + sumQ);
-      R /= (sumP + sumQ);
-      double q = sumQ / (sumP + sumQ);
-
-      //iteration output
-      std::cout << "Iteration " << current_iteration << " summary" << std::endl;
-      std::cout << " R = " << R << std::endl;
-      std::cout << " s = " << s << std::endl;
-      std::cout << " s1 = " << s1 << std::endl;
-      std::cout << " s2 = " << s2 << std::endl;
-      std::cout << " q = " << q << std::endl;
-      ofs << current_iteration << " " << R << " " << q << " " << s << " " << std::endl;
-
-      //std::cout << "x = " << Map<RowVectorXd>(current_state.data(), 1, current_state.NumberOfVariables) << std::endl;
-      //std::cout << " P = " << current_state.P().transpose() << std::endl;
-      //std::cout << " Q = " << current_state.Q().transpose() << std::endl;
+      current_iteration++;         
 
       // Check stop critiria
       if (current_iteration >= max_iter) {
@@ -144,7 +101,47 @@ int main(int argc, char *argv[]) {
         std::cout << "Convergence reached." << std::endl;
         break;
       };
+
+      //iteration output
+      std::cout << "Iteration " << current_iteration << " summary : " << " dx = " << dx << std::endl;
     };
+
+    //Steady state computation
+  /*  utility::NonlinearSolver<SourceTerm> nsolver( source );
+    nsolver.solve(x);
+    std::cout << "Solution x = " << x.tostring(2) << std::endl;
+    for (int i = 0; i < Equations::NumberOfVariables; i++) {
+      current_state[i] = x[i];
+    };*/
+
+    //obtain characteristics of interest
+    double R = 0;
+    double s = 0;
+    double s1 = 0;
+    double s2 = 0;
+    double sumP = 0;
+    double sumQ = 0;
+    for (int i = 0; i < Equations::NumberOfGenes; i++) {
+      double x = 1.0 - (2.0*i) / N;
+      s1 += current_state.P(i) * x;
+      s2 += current_state.Q(i) * x;
+      s += current_state.P(i) * x + current_state.Q(i) * x;
+      R += (current_state.P(i) * params.fitness_function_.f(i) + current_state.Q(i) * params.fitness_function_.g(i));
+      sumP += current_state.P(i);
+      sumQ += current_state.Q(i);
+    };
+    s1 /= sumP;
+    s2 /= sumQ;
+    s /= (sumP + sumQ);
+    R /= (sumP + sumQ);
+    double q = sumQ / (sumP + sumQ);
+
+    std::cout << "Result :" << std::endl;
+    std::cout << " R = " << R << std::endl;
+    std::cout << " s = " << s << std::endl;
+    std::cout << " s1 = " << s1 << std::endl;
+    std::cout << " s2 = " << s2 << std::endl;
+    std::cout << " q = " << q << std::endl;
 
     // Output result
     std::cout << "press [ENTER] to continue " << std::endl;

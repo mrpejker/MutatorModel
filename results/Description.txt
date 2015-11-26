@@ -1,0 +1,54 @@
+1) Table 1. Contains data used to plot the R(mu) dependency in the following setting :
+N = 500
+f(x) = g(x) = (3*x^2) / 2
+alpha_1 = 1.0, alpha_2 = 1.0, mu_1 = 1.0, mu_2 = mu
+
+Simulation results:
+
+2) Table 2. Contains data used to plot the q(alpha) in the following setting :
+N = 1000
+f(x) = g(x) = k*x, k = 0.3
+alpha_1 = alpha, alpha_2 = 0.0, mu_1 = 1.0, mu_2 = 10.0
+
+Simulation results:
+2.1) alpha = 1e-4
+R = 4.436163e-02
+s = 1.478721e-01
+s1 = 1.482052e-01
+s2 = 8.738691e-02
+q = 5.476618e-03
+2.2) alpha = 1e-3
+R = 4.346234e-02
+s = 1.448745e-01
+s1 = 1.482052e-01
+s2 = 8.646760e-02
+q = 5.394964e-02
+2.3) alpha = 1e-2
+R = 3.447195e-02
+s = 1.149065e-01
+s1 = 1.482051e-01
+s2 = 7.594549e-02
+q = 4.608192e-01
+2.4) alpha = 2e-2
+R = 2.449351e-02
+s = 8.164504e-02
+s1 = 1.482051e-01
+s2 = 6.078494e-02
+q = 7.613810e-01
+2.5) alpha = 5e-2
+R = 4.499026e-03
+s = 1.499675e-02
+s1 = 1.482036e-01
+s2 = 1.499675e-02
+q = 1.000000e+00
+2.6) alpha = 1e-1
+R = 4.498988e-03
+s = 1.499663e-02
+s1 = 1.576171e-01
+s2 = 1.499663e-02
+q = 1.000000e+00
+
+3) Table 3. Contains data used to plot the R(k) in the following setting :
+N = 1000
+f(x) = g(x) = k*x
+alpha_1 = 0.05, alpha_2 = 0.0, mu_1 = 1.0, mu_2 = 10.0
