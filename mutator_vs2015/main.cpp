@@ -21,15 +21,31 @@ int main(int argc, char *argv[]) {
     //Specify equations parameters
     Equations::Parameters params{ };
     double J{ 1.0 };
-    double a{ 1.0 };
-    double mu{ 0.5 };
+    double a{ 0.12 };
+    double mu{ 10 };
+    double k{ 0.9 };
+
+    //Compute theoretical predictions
+    double Rmixed = std::sqrt(k*k + 1) - a - 1;
+    double Rmutator = std::sqrt(k*k + mu*mu) - mu;
+    double border = std::sqrt(k*k + mu*mu) + a - mu + 1 - std::sqrt(k*k + 1);
+    if (border > 0) {
+      std::cout << "Theory prediction : mutator phase, border = " << border << std::endl;
+    } else {
+      std::cout << "Theory prediction : mixed phase, border = " << border << std::endl;
+    };
+    std::cout << "Rmixed_theory = " << Rmixed << std::endl;
+    std::cout << "Rmutator_theory = " << Rmutator << std::endl;
+    std::cout << "press [ENTER] to continue " << std::endl;
+    std::cin.get();
+
     //params.fitness_function_ = [&] (double x) { return (x == 0) ? std::pair<double, double>(J, J) : std::pair<double, double>(0, 0); };
-    params.fitness_function_ = [&] (double x) { return std::pair<double, double>(3*x*x/2, 3*x*x/2); };
-    //params.fitness_function_ = [&] (double x) { return std::pair<double, double>(0.3*x, 0.3*x); };
+    //params.fitness_function_ = [&] (double x) { return std::pair<double, double>(3*x*x/2, 3*x*x/2); };
+    params.fitness_function_ = [&] (double x) { return std::pair<double, double>(k*x, k*x); };
     params.mutation_rate_P = 1.0;
     params.mutation_rate_Q = mu;
     params.mutator_gene_transition_rate_P_to_Q = a;
-    params.mutator_gene_transition_rate_Q_to_P = a;
+    params.mutator_gene_transition_rate_Q_to_P = 0.0;
 
     Equations equations(params);
 
@@ -53,7 +69,7 @@ int main(int argc, char *argv[]) {
     
     int max_iter = 100000;
     double max_time = 10000.0;
-    double time_step = 1.0e-1;
+    double time_step = 5.0e-2;
 
     //Current state information   
     int current_iteration{ 0 };
@@ -137,11 +153,19 @@ int main(int argc, char *argv[]) {
     double q = sumQ / (sumP + sumQ);
 
     std::cout << "Result :" << std::endl;
-    std::cout << " R = " << R << std::endl;
-    std::cout << " s = " << s << std::endl;
-    std::cout << " s1 = " << s1 << std::endl;
-    std::cout << " s2 = " << s2 << std::endl;
-    std::cout << " q = " << q << std::endl;
+    if (border > 0) {
+      std::cout << "Theory prediction : mutator phase" << std::endl;
+    }
+    else {
+      std::cout << "Theory prediction : mixed phase" << std::endl;
+    };
+    std::cout << "R = " << R << std::endl;
+    std::cout << "Rmixed_theory = " << Rmixed << std::endl;
+    std::cout << "Rmutator_theory = " << Rmutator << std::endl;
+    std::cout << "s = " << s << std::endl;
+    std::cout << "s1 = " << s1 << std::endl;
+    std::cout << "s2 = " << s2 << std::endl;
+    std::cout << "q = " << q << std::endl;
 
     // Output result
     std::cout << "press [ENTER] to continue " << std::endl;

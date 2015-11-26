@@ -93,8 +93,108 @@ s2 = 1.499663e-02
 q = 1.000000e+00
 
 3) Table 3. Contains data used to plot the R(k) in the following setting :
-N = 1000
+N = 500
 f(x) = g(x) = k*x
-alpha_1 = 0.05, alpha_2 = 0.0, mu_1 = 1.0, mu_2 = 10.0
+alpha_1 = 0.12, alpha_2 = 0.0, mu_1 = 1.0, mu_2 = 10.0
 
+For this set of parameters  0.5 < k_crit < 0.6
 
+Results:
+3.1) k = 0.1
+Theory prediction : mutator phase
+R = 4.999875e-04
+Rmixed_theory = -1.150124e-01
+Rmutator_theory = 4.999875e-04
+s = 4.999875e-03
+s1 = 9.395957e-02
+s2 = 4.999875e-03
+q = 1.000000e+00
+3.2) k = 0.2
+Theory prediction : mutator phase
+R = 1.999800e-03
+Rmixed_theory = -1.001961e-01
+Rmutator_theory = 1.999800e-03
+s = 9.999000e-03
+s1 = 1.229576e-01
+s2 = 9.999000e-03
+q = 1.000000e+00
+
+3.3) k = 0.3
+Theory prediction : mutator phase
+R = 4.498988e-03
+Rmixed_theory = -7.596935e-02
+Rmutator_theory = 4.498988e-03
+s = 1.499663e-02
+s1 = 1.582001e-01
+s2 = 1.499663e-02
+q = 1.000000e+00
+
+3.4) k=0.4
+Theory prediction : mutator phase
+R = 7.996803e-03
+Rmixed_theory = -4.296704e-02
+Rmutator_theory = 7.996803e-03
+s = 1.999201e-02
+s1 = 1.963862e-01
+s2 = 1.999201e-02
+q = 1.000000e+00
+
+3.5) k = 0.5
+Theory prediction : mutator phase
+R = 1.249220e-02
+Rmixed_theory = -1.966011e-03
+Rmutator_theory = 1.249220e-02
+s = 2.498439e-02
+s1 = 2.360766e-01
+s2 = 2.498439e-02
+q = 1.000000e+00
+
+3.6) k = 0.6
+Theory prediction : mixed phase
+R = 4.619038e-02
+Rmixed_theory = 4.619038e-02
+Rmutator_theory = 1.798383e-02
+s = 7.698397e-02
+s1 = 2.769840e-01
+s2 = 7.369850e-02
+q = 9.838382e-01
+
+3.7) k = 0.7
+Theory prediction : mixed phase
+R = 1.006556e-01
+Rmixed_theory = 1.006556e-01
+Rmutator_theory = 2.447006e-02
+s = 1.437937e-01
+s1 = 3.152222e-01
+s2 = 1.341979e-01
+q = 9.469920e-01
+
+3.8) k = 0.8
+Theory prediction : mixed phase
+R = 1.606248e-01
+Rmixed_theory = 1.606248e-01
+Rmutator_theory = 3.194896e-02
+s = 2.007811e-01
+s1 = 3.507811e-01
+s2 = 1.850302e-01
+q = 9.049724e-01
+
+3.9) k = 0.9
+Theory prediction : mixed phase
+R = 2.253624e-01
+Rmixed_theory = 2.253624e-01
+Rmutator_theory = 4.041832e-02
+s = 2.504027e-01
+s1 = 3.837360e-01
+s2 = 2.292408e-01
+q = 8.630255e-01
+
+3.10) k = 1.0
+Theory prediction : mixed phase
+R = 2.942136e-01
+Rmixed_theory = 2.942136e-01
+Rmutator_theory = 4.987562e-02
+s = 2.942136e-01
+s1 = 4.142136e-01
+s2 = 2.684692e-01
+q = 8.233596e-01
