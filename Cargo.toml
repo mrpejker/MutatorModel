@@ -1,0 +1,10 @@
+[package]
+name = "mutator-model"
+version = "0.1.0"
+authors = ["ilerik <erik.lite@gmail.com>, mrpejker <>"]
+
+[dependencies]
+clap="*"
+futures = "*"
+tokio-core = "*"
+pretty_env_logger = "*"
