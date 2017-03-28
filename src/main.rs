@@ -87,7 +87,7 @@ fn main() {
     // command line arguments and help
     let matches = clap_app!(genaddress =>
         (version: "1.0")
-        (author: "Ilya E. <erik.lite@gmail.com>, Tatiana Yakushkina K. <sergant_chern@mail.ru")
+        (author: "Tatiana Iakushkina <tatiana.yakushkina@gmail.com>, Ilya Eriklintsev <erik.lite@gmail.com>")
         (about: "Runs numerical simulation of evolution process for population of specimen, which we assume to have genome that is approximated by binary string. We explicitly introduce presence of mutator gene that regulates mutation intensity for the rest of geneome.")
         (@arg mutation_rate_wild: --mu1 +takes_value "Sets mutation rate for wild type (lower mutation rate) replication, the rate is per capita per gene per second.")
         (@arg mutation_rate_mutator: --mu2 +takes_value "Sets mutation rate for mutator type (higher mutation rate).")
