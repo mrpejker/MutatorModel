@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
 
-// Generic functor
+// Generic functor 
 template<typename _Scalar, int NX = Eigen::Dynamic, int NY = Eigen::Dynamic>
 struct Functor
 {
@@ -81,7 +81,7 @@ public:
 
 private:
   //! Parameters of model
-  double mutation_rate_P_{ 1.0 }; // mu 1
+  double mutation_rate_P_{ 0.01 }; // mu 1
   double mutation_rate_Q_{ 2.0 }; // mu 2
   double mutator_gene_transition_rate_P_to_Q_{ 1.0 }; // alpha 1
   double mutator_gene_transition_rate_Q_to_P_{ 0.0 }; // alpha 2
@@ -93,42 +93,36 @@ public:
   MutatorEquation() = default;
 
   //! Constructor with parameters set
-  template< typename F >
-  MutatorEquation(F f, double mu, double alpha, double target_surplus = 1.0) :
+  template< typename F, typename G>
+  MutatorEquation(F f, G g, double mu, double alpha) :
     mutation_rate_Q_{ mu }, 
     mutator_gene_transition_rate_P_to_Q_{ alpha }
   {    
-    double surplus = 0.0;
     fitness_.resize(2 * (GenomeLenght_ + 1), 1);
     f_.resize(GenomeLenght_ + 1);
     g_.resize(GenomeLenght_ + 1);
     for (int i = 0; i < GenomeLenght_ + 1; i++) { 
-      double val_x = 1.0 * GenomeLenght_ + 1 - 2 * i;
-      val_x /= GenomeLenght_ + 1.0;
-      double val = f(val_x);
-      surplus += val;
-      f_[i] = val;
-      g_[i] = val;
-      fitness_(i) = val;
-      fitness_(i + GenomeLenght_ + 1) = val;            
+      double val_x = 1.0 * GenomeLenght_ - 2 * i;//average gene state in genome
+      val_x /= GenomeLenght_;
+      double val_f = f(val_x);
+	  double val_g = g(val_x);
+      f_[i] = val_f;
+      g_[i] = val_g;
+	  // Fitness functions 
+      fitness_(i) = f_[i];//wild type
+      fitness_(i + GenomeLenght_ + 1) = g_[i];//mutator type            
     };
-    
-    //for (int i = 0; i < GenomeLenght_ + 1; i++) {
-    //  f_[i] *= (target_surplus / surplus);
-    //  g_[i] *= (target_surplus / surplus);
-    //};
-    //fitness_ *= (target_surplus / surplus);
   }  
 
   //Functor behaviour
   int operator()(const Eigen::VectorXd &x, Eigen::VectorXd &fvec) const
   {     
-    //Compute average fittness
+    //Compute average fitness
     double R = 0.0;
     for (auto i = 0; i <= GenomeLenght_; i++) {
       int ip = i;
       int iq = i + GenomeLenght_ + 1;
-      R += f_[i] * x(ip) + g_[i] * x(iq);
+      R += f_[i] * x(ip) + g_[i] * x(iq);//mean fitness
       fvec(ip) = 0.0;
       fvec(iq) = 0.0;      
     };
